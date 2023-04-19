@@ -1,0 +1,13 @@
+package com.filinnv.simpleseoai;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class SimpleseoaiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(SimpleseoaiApplication.class, args);
+	}
+
+}
