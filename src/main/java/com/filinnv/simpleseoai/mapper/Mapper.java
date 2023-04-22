@@ -7,8 +7,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)public class SeoResponseMapper {
-    public static SeoResponseDto toSeoResponseDto (SeoResponse seoResponse, String inputPrompt) {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class Mapper {
+    public static SeoResponseDto toSeoResponseDto(SeoResponse seoResponse, String inputPrompt) {
         if (seoResponse != null) {
             if (seoResponse.getChoices().size() != 0) {
                 return new SeoResponseDto(inputPrompt, seoResponse.getChoices().get(0).getText());

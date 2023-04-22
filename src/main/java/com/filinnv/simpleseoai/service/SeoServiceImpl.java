@@ -1,10 +1,16 @@
 package com.filinnv.simpleseoai.service;
 
+import org.springframework.beans.factory.annotation.Value;
+import com.filinnv.simpleseoai.dto.SeoRequestDto;
 import com.filinnv.simpleseoai.dto.SeoResponseDto;
-import com.filinnv.simpleseoai.mapper.SeoResponseMapper;
-import com.filinnv.simpleseoai.model.SeoRequest;
+import com.filinnv.simpleseoai.mapper.Mapper;
+import com.filinnv.simpleseoai.model.RequestHistory;
 import com.filinnv.simpleseoai.model.SeoResponse;
+import com.filinnv.simpleseoai.repository.SeoRepository;
 import com.google.gson.Gson;
+import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -15,19 +21,25 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class SeoServiceImpl implements SeoService {
-    private final static String API_KEY = "KEY_PUT_HERE";
-    private final static String URL = "https://api.openai.com/v1/completions";
+    private final SeoRepository seoRepository;
+    @Value("${openai.apikey}")
+    private String API_KEY;
+    @Value("${openai.url}")
+    private String URL;
     private final HttpClient client = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
 
     @Override
-    public SeoResponseDto makeRequest(SeoRequest seoRequest) {
-        String requestBody = prepareRequestBody(seoRequest.getText());
+    public SeoResponseDto makeRequest(SeoRequestDto seoRequestDto) {
+        String requestBody = prepareRequestBody(seoRequestDto.getText());
         String responseBody = sendRequestToChatGpt(requestBody);
         SeoResponse seoResponse = gson.fromJson(responseBody, SeoResponse.class);
-        return SeoResponseMapper.toSeoResponseDto(seoResponse, seoRequest.getText());
+        saveToHistory(seoRequestDto.getText(), seoResponse.getChoices().get(0).getText());
+        return Mapper.toSeoResponseDto(seoResponse, seoRequestDto.getText());
     }
 
     private String prepareRequestBody(String prompt) {
@@ -50,5 +62,14 @@ public class SeoServiceImpl implements SeoService {
         } catch (Exception exception) {
             throw new RuntimeException(exception.getMessage());
         }
+    }
+
+    private void saveToHistory(String request, String response) {
+        RequestHistory requestHistory = RequestHistory.builder()
+                .request(request)
+                .response(response)
+                .build();
+        RequestHistory save = seoRepository.save(requestHistory);
+        log.info("Successful save to history id: {}, request: {}", save.getId(), request);
     }
 }

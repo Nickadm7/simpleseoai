@@ -7,17 +7,19 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@ToString
-@Table(name = "history")
-public class SeoRequest {
+@Table(name = "requesthistory")
+public class RequestHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "text")
-    private String text;
+    @Column(name = "request")
+    private String request;
+
+    @Column(name = "response")
+    private String response;
 }

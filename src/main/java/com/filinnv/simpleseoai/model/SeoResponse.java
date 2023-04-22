@@ -1,6 +1,5 @@
 package com.filinnv.simpleseoai.model;
 
-
 import lombok.Data;
 
 import java.util.List;
