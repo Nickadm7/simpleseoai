@@ -1,8 +1,9 @@
 package com.filinnv.simpleseoai.service;
 
+import com.filinnv.simpleseoai.dto.RequestHistoryDtoAdmin;
 import org.springframework.beans.factory.annotation.Value;
 import com.filinnv.simpleseoai.dto.SeoRequestDto;
-import com.filinnv.simpleseoai.dto.SeoResponseDto;
+import com.filinnv.simpleseoai.dto.RequestHistoryDto;
 import com.filinnv.simpleseoai.mapper.Mapper;
 import com.filinnv.simpleseoai.model.RequestHistory;
 import com.filinnv.simpleseoai.model.SeoResponse;
@@ -20,6 +21,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -34,12 +38,24 @@ public class SeoServiceImpl implements SeoService {
     private final Gson gson = new Gson();
 
     @Override
-    public SeoResponseDto makeRequest(SeoRequestDto seoRequestDto) {
+    public RequestHistoryDto makeRequest(SeoRequestDto seoRequestDto) {
         String requestBody = prepareRequestBody(seoRequestDto.getText());
         String responseBody = sendRequestToChatGpt(requestBody);
         SeoResponse seoResponse = gson.fromJson(responseBody, SeoResponse.class);
         saveToHistory(seoRequestDto.getText(), seoResponse.getChoices().get(0).getText());
         return Mapper.toSeoResponseDto(seoResponse, seoRequestDto.getText());
+    }
+
+    @Override
+    public RequestHistoryDtoAdmin getSeoResponseByIdByAdmin(Long id) {
+        Optional<RequestHistory> buffer = seoRepository.findById(id);
+        return buffer.map(Mapper::historyToSeoResponseDtoAdmin).orElse(null);
+    }
+
+    @Override
+    public List<RequestHistoryDtoAdmin> getAllSeoResponseByAdmin() {
+        List<RequestHistory> allHistory = seoRepository.findAll();
+        return Mapper.historyToSeoResponseDtoAdmin(allHistory);
     }
 
     private String prepareRequestBody(String prompt) {
@@ -66,6 +82,7 @@ public class SeoServiceImpl implements SeoService {
 
     private void saveToHistory(String request, String response) {
         RequestHistory requestHistory = RequestHistory.builder()
+                .created(LocalDateTime.now())
                 .request(request)
                 .response(response)
                 .build();

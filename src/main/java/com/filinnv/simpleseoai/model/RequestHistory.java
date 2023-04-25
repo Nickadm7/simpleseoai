@@ -3,6 +3,7 @@ package com.filinnv.simpleseoai.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,6 +17,9 @@ public class RequestHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Column(name ="created")
+    private LocalDateTime created;
 
     @Column(name = "request")
     private String request;

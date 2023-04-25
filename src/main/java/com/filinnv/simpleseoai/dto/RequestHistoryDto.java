@@ -4,9 +4,11 @@ import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SeoResponseDto {
+public class RequestHistoryDto {
     private String prompt;
+
     private String answer;
 }
