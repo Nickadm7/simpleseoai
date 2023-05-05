@@ -1,18 +1,18 @@
 package com.filinnv.simpleseoai.service;
 
-import com.filinnv.simpleseoai.dto.RequestHistoryDtoAdmin;
-import org.springframework.beans.factory.annotation.Value;
-import com.filinnv.simpleseoai.dto.SeoRequestDto;
 import com.filinnv.simpleseoai.dto.RequestHistoryDto;
+import com.filinnv.simpleseoai.dto.RequestHistoryDtoAdmin;
+import com.filinnv.simpleseoai.dto.SeoRequestDto;
+import com.filinnv.simpleseoai.exception.NotFoundException;
 import com.filinnv.simpleseoai.mapper.Mapper;
 import com.filinnv.simpleseoai.model.RequestHistory;
 import com.filinnv.simpleseoai.model.SeoResponse;
 import com.filinnv.simpleseoai.repository.SeoRepository;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,11 @@ public class SeoServiceImpl implements SeoService {
     @Override
     public RequestHistoryDtoAdmin getSeoResponseByIdByAdmin(Long id) {
         Optional<RequestHistory> buffer = seoRepository.findById(id);
-        return buffer.map(Mapper::historyToSeoResponseDtoAdmin).orElse(null);
+        if (buffer.isPresent()) {
+            return Mapper.historyToSeoResponseDtoAdmin(buffer.get());
+        } else {
+            throw new NotFoundException("Not found record by id: " + id);
+        }
     }
 
     @Override
